@@ -130,6 +130,7 @@ const els = {
   answerOptions: document.getElementById("answerOptions"),
   recordBtn: document.getElementById("recordBtn"),
   recordLabel: document.getElementById("recordLabel"),
+  bigMicBtn: document.getElementById("bigMicBtn"), // 兼容巨型麦克风按钮
   analyzeBtn: document.getElementById("analyzeBtn"),
   resetBtn: document.getElementById("resetBtn"),
   answerInput: document.getElementById("answerInput"),
@@ -137,7 +138,9 @@ const els = {
   radarCanvas: document.getElementById("radarCanvas"),
   radarLegend: document.getElementById("radarLegend"),
   speakSceneBtn: document.getElementById("speakSceneBtn"),
-  playDialogueBtn: document.getElementById("playDialogueBtn")
+  playDialogueBtn: document.getElementById("playDialogueBtn"),
+  trainingStage: document.querySelector(".training-stage"),
+  reportPage: document.querySelector(".report-page")
 };
 
 function init() {
@@ -151,6 +154,7 @@ function init() {
 }
 
 function renderScenarioTabs() {
+  if (!els.scenarioList) return;
   els.scenarioList.innerHTML = scenarios
     .map(
       (scenario, index) => `
@@ -165,19 +169,20 @@ function renderScenarioTabs() {
 }
 
 function renderRadarLegend(values = lastMetrics) {
+  if (!els.radarLegend) return;
   els.radarLegend.innerHTML = dimensionLabels
     .map((label, index) => `<span><i></i>${label}<b>${Math.round(values[index])}/100</b></span>`)
     .join("");
 }
 
 function bindEvents() {
-  els.scenarioList.addEventListener("click", (event) => {
+  els.scenarioList?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-index]");
     if (!button) return;
     loadScenario(Number(button.dataset.index));
   });
 
-  els.answerOptions.addEventListener("click", (event) => {
+  els.answerOptions?.addEventListener("click", (event) => {
     const button = event.target.closest("button");
     if (!button) return;
     els.answerInput.value = button.dataset.answer;
@@ -186,12 +191,16 @@ function bindEvents() {
     analyzeAnswer();
   });
 
-  els.analyzeBtn.addEventListener("click", analyzeAnswer);
-  els.resetBtn.addEventListener("click", resetTraining);
-  els.recordBtn.addEventListener("click", toggleRecording);
-  els.speakSceneBtn.addEventListener("click", speakScene);
-  els.playDialogueBtn.addEventListener("click", () => speakVillain(scenarios[currentIndex].dialogue));
-  els.answerInput.addEventListener("input", () => {
+  els.analyzeBtn?.addEventListener("click", analyzeAnswer);
+  els.resetBtn?.addEventListener("click", resetTraining);
+  
+  // 绑定常规麦克风与巨型儿童麦克风
+  els.recordBtn?.addEventListener("click", toggleRecording);
+  els.bigMicBtn?.addEventListener("click", toggleRecording);
+
+  els.speakSceneBtn?.addEventListener("click", speakScene);
+  els.playDialogueBtn?.addEventListener("click", () => speakVillain(scenarios[currentIndex].dialogue));
+  els.answerInput?.addEventListener("input", () => {
     lastMetrics = calculateMetrics(els.answerInput.value, scenarios[currentIndex]);
     drawRadar(lastMetrics);
   });
@@ -210,40 +219,58 @@ function loadScenario(index) {
   currentIndex = index;
   const scenario = scenarios[index];
 
-  els.sceneType.textContent = scenario.type;
-  els.sceneTitle.textContent = scenario.title;
-  els.riskPill.textContent = scenario.risk;
-  els.sceneImage.src = scenario.image;
-  els.sceneImage.alt = `${scenario.title}绘本式界面`;
-  els.dangerTag.textContent = scenario.tag;
-  els.scenePrompt.textContent = scenario.prompt;
-  els.dialogueText.textContent = scenario.dialogue;
-  els.coachLine.textContent = scenario.coach;
-  els.trafficText.textContent = scenario.traffic;
-  els.answerInput.value = "";
+  if (els.sceneType) els.sceneType.textContent = scenario.type;
+  if (els.sceneTitle) els.sceneTitle.textContent = scenario.title;
+  if (els.riskPill) els.riskPill.textContent = scenario.risk;
+  if (els.sceneImage) {
+    els.sceneImage.src = scenario.image;
+    els.sceneImage.alt = `${scenario.title}绘本式界面`;
+  }
+  if (els.dangerTag) els.dangerTag.textContent = scenario.tag;
+  if (els.scenePrompt) els.scenePrompt.textContent = scenario.prompt;
+  if (els.dialogueText) els.dialogueText.textContent = scenario.dialogue;
+  if (els.coachLine) els.coachLine.textContent = scenario.coach;
+  if (els.trafficText) els.trafficText.textContent = scenario.traffic;
+  if (els.answerInput) els.answerInput.value = "";
 
-  els.answerOptions.innerHTML = scenario.options
-    .map((option) => `<button class="option-button" type="button" data-answer="${option}">${option}</button>`)
-    .join("");
+  if (els.answerOptions) {
+    els.answerOptions.innerHTML = scenario.options
+      .map((option) => `<button class="option-button" type="button" data-answer="${option}">${option}</button>`)
+      .join("");
+  }
 
   document.querySelectorAll(".scenario-tab").forEach((tab) => {
     tab.classList.toggle("is-active", Number(tab.dataset.index) === index);
   });
 
   lastMetrics = [...initialMetrics];
-  setFeedback("等待回答", "选择一个做法，或按下录音按钮说出你的应对。", "neutral");
+  setFeedback("等待回答", "选择一个做法，或按下录音按钮说出你的决定。", "neutral");
   drawRadar(lastMetrics);
   updateProgress();
+  triggerStepAnimation();
+}
+
+// 激发步骤元素的淡入上升效果
+function triggerStepAnimation() {
+  const stepItems = document.querySelectorAll(".step-item");
+  stepItems.forEach((item) => item.classList.remove("show"));
+  setTimeout(() => {
+    stepItems.forEach((item, idx) => {
+      setTimeout(() => item.classList.add("show"), idx * 100);
+    });
+  }, 50);
 }
 
 function updateProgress() {
   const count = completed.size;
-  els.progressText.textContent = `${Math.max(currentIndex + 1, count)} / ${scenarios.length}`;
-  els.progressBar.style.width = `${Math.max(((count || currentIndex + 1) / scenarios.length) * 100, 20)}%`;
-  els.reportSummary.textContent =
-    count === 0
-      ? "完成练习后生成五维能力观察。"
-      : `已完成 ${count} 个场景，重点观察：识别危险、拒绝、求助。`;
+  if (els.progressText) els.progressText.textContent = `${Math.max(currentIndex + 1, count)} / ${scenarios.length}`;
+  if (els.progressBar) els.progressBar.style.width = `${Math.max(((count || currentIndex + 1) / scenarios.length) * 100, 20)}%`;
+  if (els.reportSummary) {
+    els.reportSummary.textContent =
+      count === 0
+        ? "完成练习后生成五维能力观察。"
+        : `已完成 ${count} 个场景，重点观察：识别危险、拒绝、求助。`;
+  }
 }
 
 function loadStoredAttempts() {
@@ -347,103 +374,19 @@ function clamp(value, min, max) {
 }
 
 function setFeedback(title, text, state) {
+  if (!els.feedbackBox) return;
   els.feedbackBox.className = `feedback ${
-    state === "good" ? "is-good" : state === "warning" ? "is-warning" : state === "danger" ? "is-danger" : ""
+    state === "good" ? "is-good success" : state === "warning" ? "is-warning warning" : state === "danger" ? "is-danger" : ""
   }`;
   els.feedbackBox.innerHTML = `<span class="feedback-state">${title}</span><p>${text}</p>`;
-}
-
-function showReportPage() {
-  renderReport();
-  els.trainingStage.hidden = true;
-  els.reportPage.hidden = false;
-}
-
-function showTrainingPage() {
-  els.reportPage.hidden = true;
-  els.trainingStage.hidden = false;
-}
-
-function renderReport() {
-  const finished = attempts.filter(Boolean);
-  const averageMetrics = getAverageMetrics(finished);
-  const averageScore = Math.round(averageMetrics.reduce((sum, value) => sum + value, 0) / averageMetrics.length);
-  const weakestIndex = averageMetrics.indexOf(Math.min(...averageMetrics));
-
-  els.reportScore.textContent = finished.length ? averageScore : 0;
-  els.reportOverviewText.textContent = finished.length
-    ? `已记录 ${finished.length} / ${scenarios.length} 个场景。当前最需要加强的是：${dimensionLabels[weakestIndex]}。`
-    : "还没有完成场景练习。完成回答后，这里会生成孩子的能力画像、回答记录和家庭陪伴建议。";
-
-  drawRadarOn(els.reportRadarCanvas, averageMetrics);
-  renderDimensionBars(averageMetrics);
-  renderScenarioReports();
-  renderFamilyActions(averageMetrics, weakestIndex);
-}
-
-function getAverageMetrics(finished) {
-  if (!finished.length) return [...initialMetrics];
-  return dimensionLabels.map((_, index) => {
-    const total = finished.reduce((sum, item) => sum + item.metrics[index], 0);
-    return Math.round(total / finished.length);
-  });
-}
-
-function renderDimensionBars(values) {
-  els.reportDimensionBars.innerHTML = dimensionLabels
-    .map(
-      (label, index) => `
-        <div class="dimension-row">
-          <strong>${label}</strong>
-          <div class="dimension-track"><span style="width:${values[index]}%"></span></div>
-          <b>${Math.round(values[index])}</b>
-        </div>
-      `
-    )
-    .join("");
-}
-
-function renderScenarioReports() {
-  els.scenarioReports.innerHTML = scenarios
-    .map((scenario, index) => {
-      const item = attempts[index];
-      const label = item ? item.label : "未练习";
-      const status = item ? item.status : "";
-      const answer = item ? item.answer : "暂无回答记录";
-      const feedback = item ? item.feedback : "建议完成本场景，观察孩子能否识别风险、明确拒绝并主动求助。";
-      return `
-        <div class="scenario-report">
-          <div>
-            <strong>${scenario.title}</strong>
-            <span class="${status}">${label}</span>
-          </div>
-          <p>${item ? item.time : "待完成"}</p>
-          <p>回答：${answer}<br />建议：${feedback}</p>
-        </div>
-      `;
-    })
-    .join("");
-}
-
-function renderFamilyActions(values, weakestIndex) {
-  const advice = [
-    "和孩子一起复述“身体红绿灯”：不舒服、害怕、被要求保密时，就是需要离开和求助的信号。",
-    "练习用清楚的句子拒绝：我不愿意、请别碰我、我现在要离开。",
-    "帮孩子列出 3 位可信任的大人，并约定遇到危险时可以马上联系。",
-    "在家庭中演练去人多明亮处、找老师/保安/警察、保留证据等具体动作。",
-    "提醒孩子：身体和隐私属于自己，遭遇伤害不是孩子的错。"
-  ];
-  const first = advice[weakestIndex];
-  els.familyActions.innerHTML = [first, ...advice.filter((item) => item !== first)]
-    .map((item) => `<p>${item}</p>`)
-    .join("");
 }
 
 function setupSpeechRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    els.recordLabel.textContent = "输入回答";
-    els.recordBtn.addEventListener("click", () => els.answerInput.focus(), { once: true });
+    if (els.recordLabel) els.recordLabel.textContent = "输入回答";
+    els.recordBtn?.addEventListener("click", () => els.answerInput.focus(), { once: true });
+    els.bigMicBtn?.addEventListener("click", () => els.answerInput.focus(), { once: true });
     return;
   }
 
@@ -454,8 +397,9 @@ function setupSpeechRecognition() {
 
   recognition.onstart = () => {
     isRecording = true;
-    els.recordBtn.classList.add("is-recording");
-    els.recordLabel.textContent = "正在听";
+    els.recordBtn?.classList.add("is-recording", "recording");
+    els.bigMicBtn?.classList.add("is-recording");
+    if (els.recordLabel) els.recordLabel.textContent = "正在听...";
   };
 
   recognition.onresult = (event) => {
@@ -463,7 +407,7 @@ function setupSpeechRecognition() {
     for (let i = event.resultIndex; i < event.results.length; i += 1) {
       transcript += event.results[i][0].transcript;
     }
-    els.answerInput.value = transcript;
+    if (els.answerInput) els.answerInput.value = transcript;
     lastMetrics = calculateMetrics(transcript, scenarios[currentIndex]);
     drawRadar(lastMetrics);
   };
@@ -474,22 +418,23 @@ function setupSpeechRecognition() {
 
   recognition.onend = () => {
     isRecording = false;
-    els.recordBtn.classList.remove("is-recording");
-    els.recordLabel.textContent = "说出你的决定";
-    if (els.answerInput.value.trim()) analyzeAnswer();
+    els.recordBtn?.classList.remove("is-recording", "recording");
+    els.bigMicBtn?.classList.remove("is-recording");
+    if (els.recordLabel) els.recordLabel.textContent = "说出你的决定";
+    if (els.answerInput?.value.trim()) analyzeAnswer();
   };
 }
 
 function toggleRecording() {
   if (!recognition) {
-    els.answerInput.focus();
+    els.answerInput?.focus();
     return;
   }
   if (isRecording) {
     recognition.stop();
     return;
   }
-  els.answerInput.value = "";
+  if (els.answerInput) els.answerInput.value = "";
   drawRadar(initialMetrics);
   recognition.start();
 }
@@ -498,7 +443,7 @@ function speakScene() {
   const scenario = scenarios[currentIndex];
   speakSequence([
     { text: scenario.prompt, role: "teacher" },
-    { text: `陌生人说：${scenario.dialogue}`, role: "villain" },
+    { text: `对方说：${scenario.dialogue}`, role: "villain" },
     { text: scenario.coach, role: "teacher" }
   ]);
 }
@@ -518,6 +463,10 @@ function speakWithRole(text, role) {
 function speakSequence(parts) {
   if (!("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
+  
+  // 触发播放中的波纹样式
+  els.recordBtn?.classList.add("speaking");
+
   const queue = parts.flatMap((part) =>
     segmentSpeech(part.text).map((text, index) => ({
       text,
@@ -525,13 +474,19 @@ function speakSequence(parts) {
       index
     }))
   );
+
   const playNext = () => {
     const part = queue.shift();
-    if (!part) return;
+    if (!part) {
+      els.recordBtn?.classList.remove("speaking");
+      return;
+    }
     const utterance = createUtterance(part.text, part.role, part.index);
     utterance.onend = playNext;
+    utterance.onerror = () => els.recordBtn?.classList.remove("speaking");
     window.speechSynthesis.speak(utterance);
   };
+
   playNext();
 }
 
@@ -594,6 +549,7 @@ function pickVoice(role) {
 }
 
 function drawRadar(values) {
+  if (!els.radarCanvas) return;
   drawRadarOn(els.radarCanvas, values);
   renderRadarLegend(values);
 }
@@ -676,4 +632,5 @@ if ("speechSynthesis" in window) {
   window.speechSynthesis.onvoiceschanged = refreshVoices;
 }
 
-init();
+// 页面加载完成后启动
+document.addEventListener("DOMContentLoaded", init);
