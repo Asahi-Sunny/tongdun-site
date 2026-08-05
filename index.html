@@ -8,7 +8,7 @@
   </head>
   <body>
 
-    <!-- 1. 全局导航栏（新增：提升官网与项目正式感） -->
+    <!-- 1. 全局导航栏 -->
     <header class="site-header">
       <div class="header-container">
         <div class="brand">
@@ -28,7 +28,7 @@
       </div>
     </header>
 
-    <!-- 2. 项目落地数据大字报 Banner（新增：直接破解评委“无落地成果”质疑） -->
+    <!-- 2. 项目落地数据大字报 Banner -->
     <section class="hero-data-banner" id="data-section">
       <div class="hero-container">
         <div class="hero-badge">2026 国家级大学生创新创业训练计划推荐项目</div>
@@ -57,7 +57,7 @@
       </div>
     </section>
 
-    <!-- 3. 原有系统核心交互区（保留并优化：加框包装为【实操体验区】） -->
+    <!-- 3. 原有系统核心交互区（优化升级：融入儿童巨型语音交互与分析组件） -->
     <section class="interactive-demo-section" id="demo-stage">
       <div class="section-title">
         <span>LIVE DEMO</span>
@@ -155,29 +155,49 @@
             </aside>
           </div>
 
+          <!-- 重点升级区域：支持儿童友好巨型麦克风与智能分析交互 -->
           <section class="response-panel" aria-label="回答与解析">
+            <!-- 预设文字选项 -->
             <div class="answer-options" id="answerOptions"></div>
 
-            <div class="voice-row">
-              <button class="record-button" type="button" id="recordBtn">
-                <span class="record-dot"></span>
-                <span id="recordLabel">按住/点击 语音说出你的决定</span>
+            <!-- 学姐建议：儿童友好巨型麦克风独立展示区 -->
+            <div class="big-mic-container step-item" style="text-align: center; margin: 15px 0;">
+              <button type="button" class="big-mic-btn" id="bigMicBtn" title="点击麦克风开始说话" style="cursor: pointer;">
+                🎤
               </button>
-              <button class="secondary-button" type="button" id="analyzeBtn">解析回答</button>
+              <div style="margin-top: 8px;">
+                <span id="recordLabel" style="font-weight: bold; color: var(--orange, #ff7e5f); font-size: 15px;">
+                  按住/点击 大麦克风说出你的决定
+                </span>
+              </div>
             </div>
 
+            <!-- 次要操作栏（常规语音按钮与解析按钮） -->
+            <div class="voice-row" style="display: flex; gap: 10px; margin-bottom: 12px;">
+              <button class="record-button" type="button" id="recordBtn" style="flex: 1;">
+                <span class="record-dot"></span>
+                <span>语音输入</span>
+              </button>
+              <button class="secondary-button" type="button" id="analyzeBtn" style="min-width: 110px;">
+                解析回答
+              </button>
+            </div>
+
+            <!-- 文本手动输入辅助框 -->
             <textarea id="answerInput" rows="3" placeholder="也可以在这里输入：例如“大声拒绝，马上跑到人多的地方，告诉爸爸妈妈或老师”。"></textarea>
 
+            <!-- 实时解析反馈面板 -->
             <div class="feedback" id="feedbackBox">
               <span class="feedback-state">等待回答</span>
-              <p>选择一个做法，或按下录音按钮说出你的应对。</p>
+              <p>选择一个做法，或按下大麦克风说出你的应对。</p>
             </div>
           </section>
+
         </section>
       </main>
     </section>
 
-    <!-- 4. 技术架构与专业壁垒板块（新增：突出法学背景+AI技术硬实力） -->
+    <!-- 4. 技术架构与专业壁垒板块 -->
     <section class="info-section tech-bg" id="tech-section">
       <div class="section-container">
         <div class="section-title">
@@ -203,7 +223,7 @@
       </div>
     </section>
 
-    <!-- 5. 商业与落地规划板块（新增：回应比赛落地看重点） -->
+    <!-- 5. 商业与落地规划板块 -->
     <section class="info-section" id="business-section">
       <div class="section-container">
         <div class="section-title">
@@ -236,6 +256,7 @@
       <p>© 2026 童盾智伴项目团队 | 暨南大学创新创业项目</p>
     </footer>
 
-    <script src="script.js"></script>
+    <!-- 注意：如果你之前引入的是 app.js，这里请确认脚本文件名 matches 你的名字（如 app.js 或 script.js） -->
+    <script src="app.js"></script>
   </body>
 </html>
