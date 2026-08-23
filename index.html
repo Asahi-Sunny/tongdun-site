@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>童盾智伴 - 儿童安全剧情交互训练</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="side-panel">
+        <div class="brand">
+          <img class="brand-mark" src="assets/tongtong.png" alt="" aria-hidden="true" />
+          <div>
+            <h1>童盾智伴</h1>
+            <p>AI 剧情安全训练</p>
+          </div>
+        </div>
+
+        <section class="profile-panel" aria-label="训练进度">
+          <div>
+            <span class="eyebrow">今日练习</span>
+            <strong id="progressText">1 / 5</strong>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <span id="progressBar"></span>
+          </div>
+          <button class="mini-action" type="button" id="resetBtn">一键重测</button>
+        </section>
+
+        <nav class="scenario-list" aria-label="危险场景列表" id="scenarioList"></nav>
+
+        <a class="parent-entry" href="report.html" id="openReportBtn">
+          <span>家长模式</span>
+          <strong>学习报告</strong>
+          <small id="reportSummary">完成练习后生成五维能力观察。</small>
+        </a>
+      </aside>
+
+      <section class="training-stage" id="trainingStage" aria-label="剧情训练区">
+        <header class="topbar">
+          <button class="icon-button" type="button" id="speakSceneBtn" aria-label="朗读场景">
+            <span aria-hidden="true">▶</span>
+          </button>
+          <div>
+            <span class="eyebrow" id="sceneType">身体边界</span>
+            <h2 id="sceneTitle">熟人不当触碰场景</h2>
+          </div>
+          <div class="risk-pill" id="riskPill">风险识别</div>
+        </header>
+
+        <div class="content-grid">
+          <article class="scene-card">
+            <div class="scene-media">
+              <img id="sceneImage" src="assets/scene-boundary.png" alt="儿童安全教育绘本场景" />
+              <div class="danger-tag" id="dangerTag">危险信号</div>
+            </div>
+            <div class="scene-copy">
+              <p id="scenePrompt"></p>
+              <div class="dialogue-box">
+                <div class="dialogue-head">
+                  <span>陌生人</span>
+                  <button type="button" id="playDialogueBtn">播放台词</button>
+                </div>
+                <strong id="dialogueText"></strong>
+              </div>
+            </div>
+          </article>
+
+          <aside class="coach-panel">
+            <div class="coach">
+              <img class="coach-avatar" src="assets/tongtong.png" alt="" aria-hidden="true" />
+              <div>
+                <h3>童童老师</h3>
+                <p id="coachLine">先保护自己，再找可信任的大人。</p>
+              </div>
+            </div>
+
+            <div class="radar-card">
+              <div class="radar-title">
+                <strong>五维雷达能力面板</strong>
+                <span>根据回答实时生成</span>
+              </div>
+              <canvas id="radarCanvas" width="420" height="340" aria-label="五维能力雷达图"></canvas>
+              <div class="radar-legend" id="radarLegend"></div>
+            </div>
+
+            <div class="traffic-light">
+              <span>身体红绿灯</span>
+              <div class="lights" aria-hidden="true">
+                <i class="green"></i>
+                <i class="yellow"></i>
+                <i class="red"></i>
+              </div>
+              <p id="trafficText">不舒服、害怕或被要求保密时，要马上拒绝并求助。</p>
+            </div>
+          </aside>
+        </div>
+
+        <section class="response-panel" aria-label="回答与解析">
+          <div class="answer-options" id="answerOptions"></div>
+
+          <div class="voice-row">
+            <button class="record-button" type="button" id="recordBtn">
+              <span class="record-dot" aria-hidden="true"></span>
+              <span id="recordLabel">说出你的决定</span>
+            </button>
+            <button class="secondary-button" type="button" id="analyzeBtn">解析回答</button>
+          </div>
+
+          <textarea id="answerInput" rows="3" placeholder="也可以在这里输入：例如“大声拒绝，马上跑到人多的地方，告诉爸爸妈妈或老师”。"></textarea>
+
+          <div class="feedback" id="feedbackBox">
+            <span class="feedback-state">等待回答</span>
+            <p>选择一个做法，或按下录音按钮说出你的应对。</p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
